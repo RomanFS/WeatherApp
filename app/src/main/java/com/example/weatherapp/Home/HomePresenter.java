@@ -1,6 +1,7 @@
 package com.example.weatherapp.Home;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -40,7 +41,7 @@ public class HomePresenter implements HomeContract.Presenter {
     @Override
     public void refresh(Double lat, Double lon) {
         new NetworkService().getMetaWeatherApi()
-                .getLocationDetails(lat, lon, Constants.API_KEY, 10)
+                .getLocationDetails(lat, lon, Constants.API_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<WeatherData>() {
@@ -51,7 +52,8 @@ public class HomePresenter implements HomeContract.Presenter {
 
                     @Override
                     public void onNext(WeatherData weatherData) {
-                        Log.e("", "onNext: ");
+                        if (weatherData == null) return;
+                        Log.e("", weatherData.getCity().getName());
                         mView.onDataFetched(weatherData);
                         storeFileToExternalStorage(weatherData, mView.getContext());
                     }
@@ -74,6 +76,7 @@ public class HomePresenter implements HomeContract.Presenter {
         String weatherJson = gson.toJson(weatherData);
 
         try {
+            if (context == null) return;
             File weatherFile = new File(context.getFilesDir(), Constants.WEATHER_FILE_NAME);
             if (weatherFile.exists()) weatherFile.delete();
             weatherFile.createNewFile();

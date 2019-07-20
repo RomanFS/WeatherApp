@@ -6,37 +6,25 @@ import com.google.gson.annotations.SerializedName;
 
 public class City {
 
-    @SerializedName("geoname_id")
+    @SerializedName("id")
     @Expose
-    private Integer geonameId;
+    private Integer id;
     @SerializedName("name")
     @Expose
     private String name;
-    @SerializedName("lat")
+    @SerializedName("coord")
     @Expose
-    private Double lat;
-    @SerializedName("lon")
-    @Expose
-    private Double lon;
+    private Coord coord;
     @SerializedName("country")
     @Expose
     private String country;
-    @SerializedName("iso2")
-    @Expose
-    private String iso2;
-    @SerializedName("type")
-    @Expose
-    private String type;
-    @SerializedName("population")
-    @Expose
-    private Integer population;
 
-    public Integer getGeonameId() {
-        return geonameId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setGeonameId(Integer geonameId) {
-        this.geonameId = geonameId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -47,20 +35,12 @@ public class City {
         this.name = name;
     }
 
-    public Double getLat() {
-        return lat;
+    public Coord getCoord() {
+        return coord;
     }
 
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
+    public void setCoord(Coord coord) {
+        this.coord = coord;
     }
 
     public String getCountry() {
@@ -69,30 +49,6 @@ public class City {
 
     public void setCountry(String country) {
         this.country = country;
-    }
-
-    public String getIso2() {
-        return iso2;
-    }
-
-    public void setIso2(String iso2) {
-        this.iso2 = iso2;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Integer getPopulation() {
-        return population;
-    }
-
-    public void setPopulation(Integer population) {
-        this.population = population;
     }
 
 }

@@ -2,7 +2,6 @@ package com.example.weatherapp.Home;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -23,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.weatherapp.ForecastDialogFragment;
 import com.example.weatherapp.R;
 
 public class HomeActivity extends AppCompatActivity implements HomeContract.View {
@@ -130,7 +128,7 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
 
         //Set up the forecast recycler view
         RecyclerView forecastRecyclerView = findViewById(R.id.forecast_recycler_view);
-        ForecastRecyclerAdapter forecastRecyclerAdapter = new ForecastRecyclerAdapter(this, weatherData.getList());
+        ForecastRecyclerAdapter forecastRecyclerAdapter = new ForecastRecyclerAdapter(this, weatherData.getForecast());
        /* forecastRecyclerAdapter.addActionListener {
             () ->
                     ForecastDialogFragment
