@@ -1,6 +1,6 @@
 package com.example.weatherapp.NetWorking;
 
-import com.example.weatherapp.Home.WeatherData;
+import com.example.weatherapp.Data.WeatherData;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;

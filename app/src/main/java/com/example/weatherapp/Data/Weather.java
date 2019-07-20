@@ -1,5 +1,5 @@
 
-package com.example.weatherapp.Home;
+package com.example.weatherapp.Data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

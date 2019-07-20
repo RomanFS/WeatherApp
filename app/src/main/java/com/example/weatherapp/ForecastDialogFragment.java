@@ -1,12 +1,9 @@
 package com.example.weatherapp;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +13,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.weatherapp.Home.ForecastList;
-import com.example.weatherapp.Home.Temp;
+import com.example.weatherapp.Data.Forecast;
 
 import java.io.Serializable;
 
@@ -35,7 +31,7 @@ public class ForecastDialogFragment extends DialogFragment {
         ARGS_FORECAST = "args_forecast";
     }
 
-    ForecastDialogFragment getInstance(ForecastList forecast) {
+    ForecastDialogFragment getInstance(Forecast forecast) {
         Bundle bundle = new Bundle();
         bundle.putSerializable(ARGS_FORECAST, (Serializable) forecast);
 
@@ -79,14 +75,14 @@ public class ForecastDialogFragment extends DialogFragment {
     @SuppressLint("SetTextI18n")
     private void initViews() {
         assert getArguments() != null;
-        ForecastList forecastlist = (ForecastList) getArguments().getSerializable(ARGS_FORECAST);
+        Forecast forecastlist = (Forecast) getArguments().getSerializable(ARGS_FORECAST);
         assert forecastlist != null;
-        Temp forecast = forecastlist.getTemp();
+        //Temp forecast = forecastlist.getTemp();
         //mWeatherImageView.setImageResource(WeatherToImage.getImageForCode(forecast.code));
-        mHighTemperatureTextView.setText(forecast.getMax().toString());
-        mLowTemperatureTextView.setText(forecast.getMin().toString());
+        //mHighTemperatureTextView.setText(forecast.getMax().toString());
+        //mLowTemperatureTextView.setText(forecast.getMin().toString());
         //mTextTemperatureTextView.setText(forecast.get) = forecast.text
-        mDayTextView.setText(forecast.getDay().toString());
+        //mDayTextView.setText(forecast.getDay().toString());
 
         mCloseImageView.setOnClickListener(v -> ForecastDialogFragment.this.dismiss()); {
         }

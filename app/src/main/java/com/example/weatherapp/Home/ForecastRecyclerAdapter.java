@@ -12,22 +12,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weatherapp.Data.Forecast;
 import com.example.weatherapp.R;
 
 import java.util.List;
-import java.util.function.UnaryOperator;
-
-import kotlin.Unit;
 
 public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecyclerAdapter.ViewHolder> {
     Context context;
-    List<ForecastList> forecastList;
+    List<Forecast> forecast;
 
     //private Object mListener = (ForecastList forecast) -> {};
 
-    public ForecastRecyclerAdapter(Context context, List<ForecastList> forecastList) {
+    public ForecastRecyclerAdapter(Context context, List<Forecast> forecast) {
         this.context = context;
-        this.forecastList = forecastList;
+        this.forecast = forecast;
     }
 
     @NonNull
@@ -60,10 +58,10 @@ public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecycl
 
         @SuppressLint("SetTextI18n")
         void bindData(Integer position) {
-            ForecastList forecast = forecastList.get(position);
+            Forecast forecastItem = forecast.get(position);
 
-            dayTextView.setText(forecast.getTemp().getDay().toString());
-            String high = forecast.getTemp().getMax().toString();
+            dayTextView.setText(forecastItem.getMain().getTemp().toString());
+            //String high = forecastItem.getTemp().getMax().toString();
             //val low = forecast.low.toInt();
             //val formattedTemperatureText = String.format(context.getString(R.string.celcuis_temperature), ((high + low) / 2).toString())
             //temperatureTextView.text = formattedTemperatureText

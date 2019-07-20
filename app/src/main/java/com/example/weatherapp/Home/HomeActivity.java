@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.weatherapp.Data.WeatherData;
 import com.example.weatherapp.R;
 
 public class HomeActivity extends AppCompatActivity implements HomeContract.View {

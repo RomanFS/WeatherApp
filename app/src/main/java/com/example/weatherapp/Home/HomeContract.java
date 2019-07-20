@@ -2,6 +2,8 @@ package com.example.weatherapp.Home;
 
 import android.content.Context;
 
+import com.example.weatherapp.Data.WeatherData;
+
 public interface HomeContract {
     interface View {
         void onDataFetched(WeatherData weatherData);

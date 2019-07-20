@@ -1,11 +1,11 @@
 package com.example.weatherapp.Home;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
 import com.example.weatherapp.Constants;
+import com.example.weatherapp.Data.WeatherData;
 import com.example.weatherapp.NetWorking.NetworkService;
 import com.google.gson.Gson;
 
@@ -53,6 +53,9 @@ public class HomePresenter implements HomeContract.Presenter {
                     @Override
                     public void onNext(WeatherData weatherData) {
                         if (weatherData == null) return;
+                        for (int i = 0; i < weatherData.getForecast().size(); i++) {
+                            Log.e("", "onNext: " + weatherData.getForecast().get(i).getDtTxt());
+                        }
                         Log.e("", weatherData.getCity().getName());
                         mView.onDataFetched(weatherData);
                         storeFileToExternalStorage(weatherData, mView.getContext());

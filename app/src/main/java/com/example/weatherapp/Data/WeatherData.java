@@ -1,5 +1,5 @@
 
-package com.example.weatherapp.Home;
+package com.example.weatherapp.Data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -15,7 +15,7 @@ public class WeatherData {
     @SerializedName("cnt")
     @Expose
     private Integer cnt;
-    @SerializedName("forecast")
+    @SerializedName("list")
     @Expose
     private java.util.List<Forecast> forecast = null;
     @SerializedName("city")
