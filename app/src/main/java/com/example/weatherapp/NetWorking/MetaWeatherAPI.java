@@ -7,8 +7,8 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface MetaWeatherAPI {
-    @GET("data/2.5/weather")
+    @GET("data/2.5/forecast/daily")
     Observable<WeatherData> getLocationDetails(
-            @Query("lat") Double lat, @Query("lon") Double lng,
+            @Query("lat") Double lat, @Query("lon") Double lon,
             @Query("appid") String key, @Query("ctn") Integer days);
 }

@@ -2,6 +2,7 @@ package com.example.weatherapp.Home;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,7 @@ public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecycl
     Context context;
     List<ForecastList> forecastList;
 
-    private Object mListener = (ForecastList forecast) -> {};
+    //private Object mListener = (ForecastList forecast) -> {};
 
     public ForecastRecyclerAdapter(Context context, List<ForecastList> forecastList) {
         this.context = context;
@@ -73,11 +74,12 @@ public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecycl
 
         @Override
         public void onClick(View v) {
-            mListener(forecastList.get(getAdapterPosition()));
+            Log.d("Recycle", "onClick: ");
+            //mListener(forecastList.get(getAdapterPosition()));
         }
     }
 
     void addActionListener(Object listener) {
-        mListener = listener;
+        //mListener = listener;
     }
 }

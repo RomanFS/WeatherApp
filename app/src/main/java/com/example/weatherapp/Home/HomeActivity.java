@@ -40,6 +40,8 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
         @Override
         public void onLocationChanged(Location location) {
             mSwipeRefreshLayout.setRefreshing(true);
+            mLocation = location;
+
             mPresenter.refresh(mLocation.getLatitude(), mLocation.getLongitude());
 
             //Check if the location is not null
@@ -69,8 +71,9 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        SwipeRefreshLayout mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
-        Object mLocationManager = getSystemService(Context.LOCATION_SERVICE);
+        Log.e("", "onCreate: ");
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         mPresenter = new HomePresenter();
         mPresenter.subscribe(this);
@@ -78,6 +81,7 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
         initViews();
 
         if (checkAndAskForLocationPermissions()) {
+            Log.e("", "onCreate: ");
             checkGpsEnabledAndPrompt();
         }
     }
@@ -126,36 +130,26 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
 
         //Set up the forecast recycler view
         RecyclerView forecastRecyclerView = findViewById(R.id.forecast_recycler_view);
-        ForecastRecyclerAdapter forecastRecyclerAdapter = ForecastRecyclerAdapter(this, weatherData.getList())
-        forecastRecyclerAdapter.addActionListener {
+        ForecastRecyclerAdapter forecastRecyclerAdapter = new ForecastRecyclerAdapter(this, weatherData.getList());
+       /* forecastRecyclerAdapter.addActionListener {
             () ->
                     ForecastDialogFragment
             forecastDialog = new ForecastDialogFragment.getInstance(forecast)
             forecastDialog.show(supportFragmentManager, TAG_FORECAST_DIALOG)
 
-        }
-        Log.d("updateUI", "adapter set")
+        }*/
+        Log.d("updateUI", "adapter set");
         forecastRecyclerView.setAdapter(forecastRecyclerAdapter);
         forecastRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-    }
-
-    private Boolean checkAndAskForLocationPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                String[] array = new String[1];
-                array[0] = android.Manifest.permission.ACCESS_FINE_LOCATION;
-                requestPermissions(array, (RC_LOCATION_PERMISSION);
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == RC_LOCATION_PERMISSION) {
+            //Log.e("", "RC_LOCATION_PERMISSION: ");
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.e("", "PERMISSION_GRANTED: ");
                 checkGpsEnabledAndPrompt();
             } else {
                 checkAndAskForLocationPermissions();
@@ -163,8 +157,24 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
         }
     }
 
+    private Boolean checkAndAskForLocationPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //Log.e("", "checkAndAskForLocationPermissions: ");
+            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //Log.e("", "checkAndAskForLocationPermissions: ");
+                requestPermissions(new String[] {
+                                android.Manifest.permission.ACCESS_FINE_LOCATION
+                        }, RC_LOCATION_PERMISSION);
+                return false;
+            }
+        }
+        //Log.e("", "checkAndAskForLocationPermissions: ");
+        return true;
+    }
+
     private void checkGpsEnabledAndPrompt() {
         //Check if the gps is enabled
+        Log.e("", "checkAndAskForLocationPermissions: ");
         boolean isLocationEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
         if (!isLocationEnabled) {

@@ -1,5 +1,7 @@
 package com.example.weatherapp.NetWorking;
 
+import android.util.Log;
+
 import com.example.weatherapp.Constants;
 
 import retrofit2.Retrofit;
@@ -16,18 +18,7 @@ public class NetworkService {
             .build();
 
     public MetaWeatherAPI getMetaWeatherApi() {
+        Log.e("", "getMetaWeatherApi: ");
         return retrofit.create(MetaWeatherAPI.class);
     }
 }
-/*
-
-    object NetworkService {
-private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(Constants.BASE_URL)
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .addConverterFactory(ScalarsConverterFactory.create())
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-        fun getMetaWeatherApi(): MetaWeatherApi = retrofit.create(MetaWeatherApi::class.java)
-        }*/

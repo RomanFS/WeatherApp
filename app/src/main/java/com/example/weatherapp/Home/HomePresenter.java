@@ -40,22 +40,25 @@ public class HomePresenter implements HomeContract.Presenter {
     @Override
     public void refresh(Double lat, Double lon) {
         new NetworkService().getMetaWeatherApi()
-                .getLocationDetails(Constants.API_KEY, Constants.TYPE_TEXT_PLAIN, lat, lon)
+                .getLocationDetails(lat, lon, Constants.API_KEY, 10)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<WeatherData>() {
                     @Override
                     public void onSubscribe(Disposable d) {
+                        Log.e("", "onSubscribe: ");
                     }
 
                     @Override
                     public void onNext(WeatherData weatherData) {
+                        Log.e("", "onNext: ");
                         mView.onDataFetched(weatherData);
                         storeFileToExternalStorage(weatherData, mView.getContext());
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.e("", "onNext: ", e);
                         mView.onError();
                     }
 
