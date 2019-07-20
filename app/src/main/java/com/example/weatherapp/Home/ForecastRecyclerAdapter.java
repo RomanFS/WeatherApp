@@ -22,7 +22,7 @@ public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecycl
     Context context;
     List<ForecastList> forecastList;
 
-    private Unit mListener = (ForecastList forecast) -> {};
+    private Object mListener = (ForecastList forecast) -> {};
 
     public ForecastRecyclerAdapter(Context context, List<ForecastList> forecastList) {
         this.context = context;
@@ -77,7 +77,7 @@ public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecycl
         }
     }
 
-    void addActionListener(Unit listener) {
+    void addActionListener(Object listener) {
         mListener = listener;
     }
 }
