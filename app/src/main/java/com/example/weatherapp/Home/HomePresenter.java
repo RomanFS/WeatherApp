@@ -39,9 +39,10 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @SuppressLint("CheckResult")
     @Override
-    public void refresh(Double lat, Double lon) {
+    public void refresh(String city) {
+        if (city.equals("")) city = "London";
         new NetworkService().getMetaWeatherApi()
-                .getLocationDetails(lat, lon, Constants.API_KEY)
+                .getLocationDetails(city, Constants.API_KEY, "metric")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<WeatherData>() {
@@ -52,11 +53,6 @@ public class HomePresenter implements HomeContract.Presenter {
 
                     @Override
                     public void onNext(WeatherData weatherData) {
-                        if (weatherData == null) return;
-                        for (int i = 0; i < weatherData.getForecast().size(); i++) {
-                            Log.e("", "onNext: " + weatherData.getForecast().get(i).getDtTxt());
-                        }
-                        Log.e("", weatherData.getCity().getName());
                         mView.onDataFetched(weatherData);
                         storeFileToExternalStorage(weatherData, mView.getContext());
                     }
@@ -79,7 +75,6 @@ public class HomePresenter implements HomeContract.Presenter {
         String weatherJson = gson.toJson(weatherData);
 
         try {
-            if (context == null) return;
             File weatherFile = new File(context.getFilesDir(), Constants.WEATHER_FILE_NAME);
             if (weatherFile.exists()) weatherFile.delete();
             weatherFile.createNewFile();

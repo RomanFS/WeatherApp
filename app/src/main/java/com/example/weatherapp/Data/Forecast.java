@@ -4,7 +4,9 @@ package com.example.weatherapp.Data;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Forecast {
+import java.io.Serializable;
+
+public class Forecast implements Serializable {
 
     @SerializedName("dt")
     @Expose

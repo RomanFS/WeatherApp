@@ -1,6 +1,7 @@
 package com.example.weatherapp.Home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +12,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,78 +29,72 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.weatherapp.Data.Forecast;
 import com.example.weatherapp.Data.WeatherData;
+import com.example.weatherapp.ForecastDialogFragment;
+import com.example.weatherapp.NetWorking.MetaWeatherAPI;
 import com.example.weatherapp.R;
+import com.example.weatherapp.WeatherToImage;
 
-public class HomeActivity extends AppCompatActivity implements HomeContract.View {
+import org.w3c.dom.Text;
 
-    private final static int RC_ENABLE_LOCATION = 1;
-    private final static int RC_LOCATION_PERMISSION = 2;
+public class HomeActivity extends AppCompatActivity implements HomeContract.View, ForecastRecyclerAdapter.ItemAttach {
+
     private final static String TAG_FORECAST_DIALOG = "forecast_dialog";
     HomeContract.Presenter mPresenter;
     LocationManager mLocationManager;
     SwipeRefreshLayout mSwipeRefreshLayout;
-    Location mLocation;
+    EditText inputCity;
+    TextView cityName;
 
-    LocationListener mLocationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            mSwipeRefreshLayout.setRefreshing(true);
-            mLocation = location;
 
-            mPresenter.refresh(mLocation.getLatitude(), mLocation.getLongitude());
+    @Override
+    public void onClick(Forecast forecast) {
+        ForecastDialogFragment forecastDialog = new ForecastDialogFragment(forecast);
+        forecastDialog.show(getSupportFragmentManager(), TAG_FORECAST_DIALOG);
+    }
 
-            //Check if the location is not null
-            //Remove the location listener as we don't need to fetch the weather again and again
-            mLocation = location;
-            mLocationManager.removeUpdates(this);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_home);
 
         Log.e("", "onCreate: ");
         mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        inputCity = findViewById(R.id.input_city);
+
+        inputCity.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+
+                mSwipeRefreshLayout.setRefreshing(true);
+                mPresenter.refresh(inputCity.getText().toString());
+                inputCity.clearFocus();
+                InputMethodManager in = (InputMethodManager)
+                        this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                in.hideSoftInputFromWindow(inputCity.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
 
         mPresenter = new HomePresenter();
         mPresenter.subscribe(this);
 
-        initViews();
+        mSwipeRefreshLayout.setRefreshing(true);
+        mPresenter.refresh("");
 
-        if (checkAndAskForLocationPermissions()) {
-            Log.e("", "onCreate: ");
-            checkGpsEnabledAndPrompt();
-        }
+        initViews();
     }
 
     private void initViews() {
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
-            if (mLocation != null) {
-                if (mLocation.getLatitude() != 0.0 && mLocation.getLongitude() != 0.0) {
-                    mPresenter.refresh(mLocation.getLatitude(), mLocation.getLongitude());
-                }
-            } else {
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
+            String city = cityName.getText().toString();
+
+            mPresenter.refresh(city);
+            mSwipeRefreshLayout.setRefreshing(false);
         });
     }
 
@@ -103,125 +104,43 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
         updateUI(weatherData);
     }
 
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    @SuppressLint("SetTextI18n")
     private void updateUI(WeatherData weatherData) {
         TextView temperatureTextView = findViewById(R.id.temperature_text_view);
         TextView windSpeedTextView = findViewById(R.id.wind_speed_text_view);
         TextView humidityTextView = findViewById(R.id.humidity_text_view);
         ImageView weatherImageView = findViewById(R.id.weather_image_view);
         TextView weatherConditionTextView = findViewById(R.id.weather_condition_text_view);
-        TextView cityNameTextView = findViewById(R.id.city_name_text_view);
+        cityName = findViewById(R.id.city_name);
 
-        //String formattedTemperatureText = String.format(getString(R.string.celcuis_temperature), "");
+        Forecast forecast = weatherData.getForecast().get(0);
 
-        //temperatureTextView.setText(formattedTemperatureText); //= formattedTemperatureText
-        windSpeedTextView.setText(""); //= "+ km/h";
-        humidityTextView.setText(""); //= "+ %";
+        cityName.setText(weatherData.getCity().getName());
+        weatherConditionTextView.setText(forecast.getWeather().get(0).getMain());
 
-        //Set the weather conditions
-        String weatherCode = "";
+        Integer id = forecast.getWeather().get(0).getId();
+        weatherImageView.setImageResource(new WeatherToImage().getImageForCode(id));
 
-        //Set the name
-        String city = "";
-        String country = "";
-        String region = "";
-        cityNameTextView.setText("");
-        ;//"${city.trim()}, ${region.trim()}, ${country.trim()}"
+        int temp = (int) Math.round(forecast.getMain().getTemp());
+        temperatureTextView.setText(temp + " °C");
+
+        windSpeedTextView.setText(forecast.getWind().getSpeed().toString() + "km/h");
+        humidityTextView.setText(forecast.getMain().getHumidity().toString() + "%");
 
         //Set up the forecast recycler view
         RecyclerView forecastRecyclerView = findViewById(R.id.forecast_recycler_view);
-        ForecastRecyclerAdapter forecastRecyclerAdapter = new ForecastRecyclerAdapter(this, weatherData.getForecast());
-       /* forecastRecyclerAdapter.addActionListener {
-            () ->
-                    ForecastDialogFragment
-            forecastDialog = new ForecastDialogFragment.getInstance(forecast)
-            forecastDialog.show(supportFragmentManager, TAG_FORECAST_DIALOG)
+        ForecastRecyclerAdapter forecastRecyclerAdapter = new ForecastRecyclerAdapter(this,
+                weatherData.getForecast(), this);
 
-        }*/
         Log.d("updateUI", "adapter set");
         forecastRecyclerView.setAdapter(forecastRecyclerAdapter);
-        forecastRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == RC_LOCATION_PERMISSION) {
-            //Log.e("", "RC_LOCATION_PERMISSION: ");
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.e("", "PERMISSION_GRANTED: ");
-                checkGpsEnabledAndPrompt();
-            } else {
-                checkAndAskForLocationPermissions();
-            }
-        }
-    }
-
-    private Boolean checkAndAskForLocationPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //Log.e("", "checkAndAskForLocationPermissions: ");
-            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                //Log.e("", "checkAndAskForLocationPermissions: ");
-                requestPermissions(new String[] {
-                                android.Manifest.permission.ACCESS_FINE_LOCATION
-                        }, RC_LOCATION_PERMISSION);
-                return false;
-            }
-        }
-        //Log.e("", "checkAndAskForLocationPermissions: ");
-        return true;
-    }
-
-    private void checkGpsEnabledAndPrompt() {
-        //Check if the gps is enabled
-        Log.e("", "checkAndAskForLocationPermissions: ");
-        boolean isLocationEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-        if (!isLocationEnabled) {
-            //Show alert dialog to enable gps
-            new AlertDialog.Builder(this)
-                    .setCancelable(false)
-                    .setTitle("GPS is not enabled")
-                    .setMessage("This app required GPS to get the weather information. Do you want to enable GPS?")
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivityForResult(intent, RC_ENABLE_LOCATION);
-
-                        dialog.dismiss();
-                    })
-                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                        dialog.dismiss();
-                    })
-                    .create()
-                    .show();
-        } else {
-            requestLocationUpdates();
-        }
-    }
-
-    private void requestLocationUpdates() {
-        String provider = LocationManager.NETWORK_PROVIDER;
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
-        }
-        mLocationManager.requestLocationUpdates(provider, 0, 0.0f, mLocationListener);
-
-        Location location = mLocationManager.getLastKnownLocation(provider);
-        mLocationListener.onLocationChanged(location);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_ENABLE_LOCATION) {
-            checkGpsEnabledAndPrompt();
-        }
+        forecastRecyclerView.setLayoutManager(new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false));
     }
 
     @Override
@@ -234,8 +153,5 @@ public class HomeActivity extends AppCompatActivity implements HomeContract.View
 
     }
 
-    @Override
-    public Context getContext() {
-        return null;
-    }
+
 }

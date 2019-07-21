@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.DialogFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,15 @@ import android.widget.TextView;
 
 import com.example.weatherapp.Data.Forecast;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Objects;
 
 public class ForecastDialogFragment extends DialogFragment {
-    private static String ARGS_FORECAST;
 
     private ImageView mWeatherImageView;
     private TextView mHighTemperatureTextView;
@@ -27,18 +33,10 @@ public class ForecastDialogFragment extends DialogFragment {
     private TextView mDayTextView;
     private ImageView mCloseImageView;
 
-    public ForecastDialogFragment() {
-        ARGS_FORECAST = "args_forecast";
-    }
+    private Forecast forecast;
 
-    ForecastDialogFragment getInstance(Forecast forecast) {
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(ARGS_FORECAST, (Serializable) forecast);
-
-        ForecastDialogFragment fragment = new ForecastDialogFragment();
-        fragment.setArguments(bundle);
-
-        return fragment;
+    public ForecastDialogFragment(Forecast forecast) {
+        this.forecast = forecast;
     }
 
     @Override
@@ -47,8 +45,9 @@ public class ForecastDialogFragment extends DialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.dialog_forecast_info, container, false);
 
         mWeatherImageView = view.findViewById(R.id.weather_image_view);
@@ -65,24 +64,33 @@ public class ForecastDialogFragment extends DialogFragment {
 
     @Override
     public void onResume() {
+        //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow())
+                .setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT);
         super.onResume();
-        if (getDialog() == null) return;
-        if (getDialog().getWindow() == null) return;
-        getDialog().getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
     }
 
     @SuppressLint("SetTextI18n")
     private void initViews() {
-        assert getArguments() != null;
-        Forecast forecastlist = (Forecast) getArguments().getSerializable(ARGS_FORECAST);
-        assert forecastlist != null;
-        //Temp forecast = forecastlist.getTemp();
-        //mWeatherImageView.setImageResource(WeatherToImage.getImageForCode(forecast.code));
-        //mHighTemperatureTextView.setText(forecast.getMax().toString());
-        //mLowTemperatureTextView.setText(forecast.getMin().toString());
-        //mTextTemperatureTextView.setText(forecast.get) = forecast.text
-        //mDayTextView.setText(forecast.getDay().toString());
+        int tempMax = (int) Math.round(forecast.getMain().getTempMax());
+        mHighTemperatureTextView.setText(tempMax + " °C");
+        int tempMin = (int) Math.round(forecast.getMain().getTempMin());
+        mLowTemperatureTextView.setText(tempMin + " °C");
+
+        mWeatherImageView.setImageResource(new WeatherToImage()
+                .getImageForCode(forecast.getWeather().get(0).getId()));
+
+        long time = forecast.getDt();
+        long timestampLong = time*1000;
+        Date d = new Date(timestampLong);
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+
+        String dayName = c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
+        mDayTextView.setText(dayName);
+
+        mTextTemperatureTextView.setText(forecast.getWeather().get(0).getMain());
 
         mCloseImageView.setOnClickListener(v -> ForecastDialogFragment.this.dismiss()); {
         }

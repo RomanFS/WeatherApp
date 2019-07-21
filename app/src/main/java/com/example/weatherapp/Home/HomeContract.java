@@ -21,6 +21,6 @@ public interface HomeContract {
 
         void unSubscribe();
 
-        void refresh(Double lat, Double lon);
+        void refresh(String city);
     }
 }

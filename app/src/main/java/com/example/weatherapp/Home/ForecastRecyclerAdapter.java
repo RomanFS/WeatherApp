@@ -14,16 +14,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weatherapp.Data.Forecast;
 import com.example.weatherapp.R;
+import com.example.weatherapp.WeatherToImage;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecyclerAdapter.ViewHolder> {
-    Context context;
-    List<Forecast> forecast;
+    private Context context;
+    private List<Forecast> forecast;
+    private ItemAttach clicker;
 
-    //private Object mListener = (ForecastList forecast) -> {};
+    interface ItemAttach {
+        void onClick(Forecast forecast);
+    }
 
-    public ForecastRecyclerAdapter(Context context, List<Forecast> forecast) {
+    ForecastRecyclerAdapter(Context context, List<Forecast> forecast, ItemAttach clicker) {
+        this.clicker = clicker;
         this.context = context;
         this.forecast = forecast;
     }
@@ -42,42 +52,53 @@ public class ForecastRecyclerAdapter extends RecyclerView.Adapter<ForecastRecycl
 
     @Override
     public int getItemCount() {
-        return 0;
+        return forecast.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            itemView.setOnClickListener(this);
         }
 
         TextView dayTextView = itemView.findViewById(R.id.day_text_view) ;
         ImageView weatherImageView = itemView.findViewById(R.id.weather_image_view);
         TextView temperatureTextView = itemView.findViewById(R.id.temperature_text_view);
+        TextView timeTextView = itemView.findViewById(R.id.time_text_view);
 
         @SuppressLint("SetTextI18n")
         void bindData(Integer position) {
             Forecast forecastItem = forecast.get(position);
 
-            dayTextView.setText(forecastItem.getMain().getTemp().toString());
-            //String high = forecastItem.getTemp().getMax().toString();
-            //val low = forecast.low.toInt();
-            //val formattedTemperatureText = String.format(context.getString(R.string.celcuis_temperature), ((high + low) / 2).toString())
-            //temperatureTextView.text = formattedTemperatureText
+            long time = forecastItem.getDt();
+            long timestampLong = time*1000;
+            Date d = new Date(timestampLong);
+            Calendar c = Calendar.getInstance();
+            c.setTime(d);
 
-            //weatherImageView.setImageResource(WeatherToImage.getImageForCode(forecast?.code
-             //       ?: "3200"))
+            @SuppressLint("SimpleDateFormat")
+            SimpleDateFormat broken = new SimpleDateFormat("HH:mm");
+            broken.setTimeZone(TimeZone.getDefault());
+
+            String dayName =
+                    c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
+
+            dayTextView.setText(dayName);
+            timeTextView.setText(broken.format(d));
+
+
+            int tempMax = (int) Math.round(forecastItem.getMain().getTemp());
+            temperatureTextView.setText(tempMax + " °C");
+
+            weatherImageView.setImageResource(new WeatherToImage()
+                    .getImageForCode(forecastItem.getWeather().get(0).getId()));
+
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            Log.d("Recycle", "onClick: ");
-            //mListener(forecastList.get(getAdapterPosition()));
+            clicker.onClick(forecast.get(getAdapterPosition()));
         }
-    }
-
-    void addActionListener(Object listener) {
-        //mListener = listener;
     }
 }
